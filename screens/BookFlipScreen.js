@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
-import PagerView from 'react-native-pager-view';
+import { View, Text, StyleSheet, Dimensions, ActivityIndicator, Platform } from 'react-native';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 const { width, height } = Dimensions.get('window');
+
+// Only import PagerView on native platforms
+let PagerView;
+if (Platform.OS !== 'web') {
+  PagerView = require('react-native-pager-view').default;
+}
 
 export default function BookFlipScreen() {
   const [lyrics, setLyrics] = useState([]);
@@ -34,6 +39,15 @@ export default function BookFlipScreen() {
     return (
       <View style={styles.centered}>
         <Text style={styles.emptyText}>No lyrics found. Try adding some!</Text>
+      </View>
+    );
+  }
+
+  // Show placeholder on web
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.emptyText}>Flip view is not supported on web. Please use a mobile device.</Text>
       </View>
     );
   }
@@ -86,7 +100,8 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontStyle: 'italic',
-    color: '#555'
+    color: '#555',
+    textAlign: 'center'
   },
   centered: {
     flex: 1,
