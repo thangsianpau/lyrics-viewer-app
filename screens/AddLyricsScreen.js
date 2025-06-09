@@ -1,5 +1,28 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+
+const handleAdd = async () => {
+  if (!title || !artist || !lyrics) {
+    Alert.alert('Please fill all fields');
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, 'lyrics'), {
+      title,
+      artist,
+      lyrics
+    });
+    Alert.alert('Lyric saved to the cloud!');
+    navigation.goBack();
+  } catch (error) {
+    console.error("Error saving lyric:", error);
+    Alert.alert('Failed to save lyric');
+  }
+};
+
 
 export default function AddLyricsScreen({ navigation }) {
   const [title, setTitle] = useState('');
