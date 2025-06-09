@@ -1,6 +1,18 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { lyricsList } from '../data/lyrics';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+
+useEffect(() => {
+  const unsubscribe = onSnapshot(collection(db, 'lyrics'), (snapshot) => {
+    const data = snapshot.docs.map(doc => doc.data());
+    setLyrics(data);
+  });
+
+  return unsubscribe; // stop listening when screen unmounts
+}, []);
+
 
 export default function HomeScreen({ navigation }) {
   return (
