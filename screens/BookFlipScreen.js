@@ -12,6 +12,7 @@ export default function BookFlipScreen() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'lyrics'), (snapshot) => {
       const data = snapshot.docs.map(doc => doc.data());
+      console.log('🔥 Lyrics from Firestore:', data);
       setLyrics(data);
     });
     return unsubscribe;
