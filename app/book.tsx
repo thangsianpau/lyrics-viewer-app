@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import BookFlipScreen from '../../screens/BookFlipScreen';
+import BookFlipScreen from '../screens/BookFlipScreen';
 
 export default function BookTab() {
   return (
