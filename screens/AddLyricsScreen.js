@@ -4,22 +4,25 @@ import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 const handleAdd = async () => {
-  if (!title || !artist || !lyrics) {
-    Alert.alert('Please fill all fields');
+  if (!title.trim() || !artist.trim() || !lyrics.trim()) {
+    Alert.alert('All fields are required!');
     return;
   }
 
   try {
-    await addDoc(collection(db, 'lyrics'), {
-      title,
-      artist,
-      lyrics
-    });
-    Alert.alert('Lyric saved to the cloud!');
+    const newDoc = {
+      title: title.trim(),
+      artist: artist.trim(),
+      lyrics: lyrics.trim()
+    };
+
+    await addDoc(collection(db, 'lyrics'), newDoc);
+    console.log('Added lyric:', newDoc);
+    Alert.alert('Lyrics added!');
     navigation.goBack();
   } catch (error) {
-    console.error("Error saving lyric:", error);
-    Alert.alert('Failed to save lyric');
+    console.error('Add failed:', error);
+    Alert.alert('Failed to add lyrics');
   }
 };
 
