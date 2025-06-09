@@ -1,5 +1,11 @@
 import { Image } from 'expo-image';
 import { Platform, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+
+const router = useRouter();
+
+<Button title="Add New Lyric" onPress={() => router.push('/add')} />
+
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
