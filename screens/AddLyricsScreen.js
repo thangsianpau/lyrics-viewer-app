@@ -1,69 +1,94 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
-const handleAdd = async () => {
-  if (!title.trim() || !artist.trim() || !lyrics.trim()) {
-    Alert.alert('All fields are required!');
-    return;
-  }
-
-  try {
-    const newDoc = {
-      title: title.trim(),
-      artist: artist.trim(),
-      lyrics: lyrics.trim()
-    };
-
-    await addDoc(collection(db, 'lyrics'), newDoc);
-    console.log('Added lyric:', newDoc);
-    Alert.alert('Lyrics added!');
-    navigation.goBack();
-  } catch (error) {
-    console.error('Add failed:', error);
-    Alert.alert('Failed to add lyrics');
-  }
-};
-
-
-export default function AddLyricsScreen({ navigation }) {
-  const [title, setTitle] = useState('');
+const AddLyricsScreen = () => {
   const [artist, setArtist] = useState('');
-  const [lyrics, setLyrics] = useState('');
+  const [title, setTitle] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleAdd = () => {
-    if (!title || !artist || !lyrics) {
-      Alert.alert('Please fill all fields');
+  const getLyrics = async (artist, title) => {
+    try {
+      const res = await fetch(`https://api.lyrics.ovh/v1/${artist}/${title}`);
+      const data = await res.json();
+      return data.lyrics || 'No lyrics found.';
+    } catch (err) {
+      console.error('API error:', err);
+      return 'Error fetching lyrics.';
+    }
+  };
+
+  const saveLyrics = async () => {
+    if (!artist || !title) {
+      Alert.alert('Missing Info', 'Please enter both artist and title.');
       return;
     }
-    Alert.alert('Lyric saved (not permanent yet)');
-    navigation.goBack();
+
+    setLoading(true);
+    const lyrics = await getLyrics(artist, title);
+
+    try {
+      await addDoc(collection(db, 'lyrics'), {
+        title,
+        artist,
+        lyrics,
+        createdAt: new Date()
+      });
+      Alert.alert('Success', 'Lyrics saved!');
+      setArtist('');
+      setTitle('');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save lyrics.');
+      console.error('Firebase error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <TextInput placeholder="Title" style={styles.input} value={title} onChangeText={setTitle} />
-      <TextInput placeholder="Artist" style={styles.input} value={artist} onChangeText={setArtist} />
-      <TextInput placeholder="Lyrics" style={styles.textarea} value={lyrics} onChangeText={setLyrics} multiline />
-      <Button title="Add Lyrics" onPress={handleAdd} />
+      <Text style={styles.heading}>Add New Lyrics</Text>
+      <TextInput
+        placeholder="Artist"
+        value={artist}
+        onChangeText={setArtist}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Song Title"
+        value={title}
+        onChangeText={setTitle}
+        style={styles.input}
+      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#007AFF" />
+      ) : (
+        <Button title="Fetch & Save Lyrics" onPress={saveLyrics} />
+      )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: { padding: 20 },
-  input: {
-    borderBottomWidth: 1,
-    marginBottom: 15,
-    fontSize: 16
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
   },
-  textarea: {
-    borderWidth: 1,
-    height: 150,
+  heading: {
+    fontSize: 22,
+    fontWeight: 'bold',
     marginBottom: 20,
-    padding: 10,
-    textAlignVertical: 'top',
-    fontSize: 16
-  }
+    textAlign: 'center'
+  },
+  input: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    padding: 12,
+    marginBottom: 12,
+    borderRadius: 8,
+  },
 });
+
+export default AddLyricsScreen;
