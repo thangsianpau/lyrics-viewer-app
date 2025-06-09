@@ -5,15 +5,10 @@ import { db } from '../firebaseConfig';
 
 const { width, height } = Dimensions.get('window');
 
-// Only import PagerView on native platforms
-let PagerView;
-if (Platform.OS !== 'web') {
-  PagerView = require('react-native-pager-view').default;
-}
-
 export default function BookFlipScreen() {
   const [lyrics, setLyrics] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [PagerView, setPagerView] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'lyrics'), (snapshot) => {
@@ -23,10 +18,24 @@ export default function BookFlipScreen() {
       setLoading(false);
     });
 
+    if (Platform.OS !== 'web') {
+      import('react-native-pager-view').then(module => {
+        setPagerView(() => module.default);
+      });
+    }
+
     return () => unsubscribe();
   }, []);
 
-  if (loading) {
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.emptyText}>Flip view is not supported on web. Please use a mobile device.</Text>
+      </View>
+    );
+  }
+
+  if (loading || !PagerView) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#444" />
@@ -39,15 +48,6 @@ export default function BookFlipScreen() {
     return (
       <View style={styles.centered}>
         <Text style={styles.emptyText}>No lyrics found. Try adding some!</Text>
-      </View>
-    );
-  }
-
-  // Show placeholder on web
-  if (Platform.OS === 'web') {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.emptyText}>Flip view is not supported on web. Please use a mobile device.</Text>
       </View>
     );
   }
