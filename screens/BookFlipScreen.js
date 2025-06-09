@@ -17,13 +17,26 @@ export default function BookFlipScreen() {
     return unsubscribe;
   }, []);
 
+  // Show message if no lyrics
+  if (lyrics.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No lyrics found. Try adding some!</Text>
+      </View>
+    );
+  }
+
   return (
     <PagerView style={styles.pager} initialPage={0}>
       {lyrics.map((item, index) => (
         <View key={index} style={styles.page}>
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.artist}>by {item.artist}</Text>
-          <Text style={styles.lyrics}>{item.lyrics}</Text>
+          <Text style={styles.title}>{item.title || '(Untitled)'}</Text>
+          <Text style={styles.artist}>by {item.artist || 'Unknown Artist'}</Text>
+          <Text style={styles.lyrics}>
+            {(item.lyrics || '(No lyrics)').split('\n').map((line, i) => (
+              <Text key={i}>{line}{'\n'}</Text>
+            ))}
+          </Text>
         </View>
       ))}
     </PagerView>
@@ -38,7 +51,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     justifyContent: 'center',
-    backgroundColor: '#f5f2e7' // light parchment style
+    backgroundColor: '#f5f2e7' // Light parchment look
   },
   title: {
     fontSize: 26,
@@ -56,6 +69,17 @@ const styles = StyleSheet.create({
   lyrics: {
     fontSize: 16,
     lineHeight: 26,
-    whiteSpace: 'pre-line'
+    textAlign: 'left'
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f2e7'
+  },
+  emptyText: {
+    fontSize: 18,
+    fontStyle: 'italic',
+    color: '#555'
   }
 });
