@@ -24,7 +24,8 @@ export default function TabLayout() {
           },
           default: {},
         }),
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -43,15 +44,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="book"
-        options={{
-          title: 'Book',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="book.fill" color={color} />
-          ),
-        }}
-      />
+      {/* Removed Lyrics Book Tab */}
     </Tabs>
   );
 }
