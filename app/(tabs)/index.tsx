@@ -1,3 +1,4 @@
+import { Button } from 'react-native';
 import { Image } from 'expo-image';
 import { Platform, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
