@@ -59,7 +59,9 @@ export default function HomeScreen() {
       </ThemedView>
 
       <ThemedView style={styles.stepContainer}>
-        <Button title="➕ Add New Lyric" onPress={() => router.push('/add')} />
+        <Button title="View Lyrics Book" onPress={() => router.push('/book')} />
+        <Button title="Add New Lyric" onPress={() => router.push('/add')} />
+
       </ThemedView>
     </ParallaxScrollView>
   );
