@@ -5,7 +5,7 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
@@ -54,13 +54,13 @@ export default function ViewLyricsScreen() {
       renderItem={({ item, index }) => (
         <TouchableOpacity
           style={styles.item}
-          onPress={() => navigation.navigate('BookFlipScreen', {
-            selectedIndex: index,
-          })}
+          onPress={() =>
+            navigation.navigate('SingleLyricScreen', {
+              lyric: item,
+            })
+          }
         >
-          <Text style={styles.itemText}>
-            {index + 1}. {item.title} - {item.artist}
-          </Text>
+          <Text style={styles.itemText}>{index + 1}. {item.title}</Text>
         </TouchableOpacity>
       )}
     />
@@ -69,11 +69,12 @@ export default function ViewLyricsScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    paddingVertical: 20,
     backgroundColor: '#000',
   },
   item: {
-    padding: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     borderBottomColor: '#444',
     borderBottomWidth: 1,
   },
