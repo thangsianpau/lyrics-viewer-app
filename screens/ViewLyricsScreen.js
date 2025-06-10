@@ -1,42 +1,90 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator
+} from 'react-native';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import { useNavigation } from '@react-navigation/native';
 
-export default function ViewLyricsScreen({ route }) {
-  const { lyric } = route.params;
+export default function ViewLyricsScreen() {
+  const [lyricsList, setLyricsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'lyrics'), (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setLyricsList(data);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+        <Text>Loading lyrics...</Text>
+      </View>
+    );
+  }
+
+  if (lyricsList.length === 0) {
+    return (
+      <View style={styles.centered}>
+        <Text>No lyrics found. Try adding some!</Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>{lyric.title}</Text>
-      <Text style={styles.artist}>by {lyric.artist}</Text>
-      <Text style={styles.lyrics}>{lyric.lyrics}</Text>
-    </ScrollView>
+    <FlatList
+      data={lyricsList}
+      keyExtractor={(item) => item.id}
+      contentContainerStyle={styles.container}
+      renderItem={({ item, index }) => (
+        <TouchableOpacity
+          style={styles.item}
+          onPress={() => navigation.navigate('BookFlipScreen', {
+            selectedIndex: index,
+          })}
+        >
+          <Text style={styles.itemText}>
+            {index + 1}. {item.title} - {item.artist}
+          </Text>
+        </TouchableOpacity>
+      )}
+    />
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 30,
-    paddingVertical: 40,
+    padding: 20,
+    backgroundColor: '#000',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-    fontFamily: 'serif',
+  item: {
+    padding: 16,
+    borderBottomColor: '#444',
+    borderBottomWidth: 1,
   },
-  artist: {
+  itemText: {
     fontSize: 18,
-    textAlign: 'center',
-    marginBottom: 30,
-    fontStyle: 'italic',
-    fontFamily: 'serif',
+    color: '#fff',
   },
-  lyrics: {
-    fontSize: 18,
-    lineHeight: 30,
-    fontFamily: 'serif',
-    textAlign: 'justify',
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
   },
 });
