@@ -19,7 +19,7 @@ const AddLyricsScreen = () => {
   const [loading, setLoading] = useState(false);
 
   const saveLyrics = async () => {
-    console.log('✅ Save button pressed');
+    console.log('🚀 Saving:', { artist, title, lyrics });
 
     if (!artist || !title || !lyrics) {
       Alert.alert('Missing Info', 'Please fill in artist, title, and lyrics.');
@@ -40,7 +40,7 @@ const AddLyricsScreen = () => {
       setTitle('');
       setLyrics('');
     } catch (error) {
-      console.error('Firebase Error:', error);
+      console.error('❌ Firestore Error:', error);
       Alert.alert('Error', 'Failed to save lyrics.');
     } finally {
       setLoading(false);
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     justifyContent: 'center',
-    backgroundColor: '#000', // black background for dark mode
+    backgroundColor: '#000',
   },
   heading: {
     fontSize: 22,
