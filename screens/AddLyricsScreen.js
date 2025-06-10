@@ -12,10 +12,14 @@ const AddLyricsScreen = () => {
     try {
       const res = await fetch(`https://api.lyrics.ovh/v1/${artist}/${title}`);
       const data = await res.json();
-      return data.lyrics || 'No lyrics found.';
+      if (!data.lyrics) {
+        throw new Error('Lyrics not found.');
+      }
+      return data.lyrics;
     } catch (err) {
-      console.error('API error:', err);
-      return 'Error fetching lyrics.';
+      console.error('Fetch Error:', err);
+      Alert.alert('Error', 'Lyrics not found. Check artist or title.');
+      return null;
     }
   };
 
@@ -27,6 +31,11 @@ const AddLyricsScreen = () => {
 
     setLoading(true);
     const lyrics = await getLyrics(artist, title);
+
+    if (!lyrics) {
+      setLoading(false);
+      return;
+    }
 
     try {
       await addDoc(collection(db, 'lyrics'), {
@@ -51,12 +60,14 @@ const AddLyricsScreen = () => {
       <Text style={styles.heading}>Add New Lyrics</Text>
       <TextInput
         placeholder="Artist"
+        placeholderTextColor="#888"
         value={artist}
         onChangeText={setArtist}
         style={styles.input}
       />
       <TextInput
         placeholder="Song Title"
+        placeholderTextColor="#888"
         value={title}
         onChangeText={setTitle}
         style={styles.input}
@@ -75,12 +86,14 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: 'center',
+    backgroundColor: '#000' // 🖤 background for dark mode
   },
   heading: {
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 20,
-    textAlign: 'center'
+    textAlign: 'center',
+    color: '#fff' // 🟡 visible in dark mode
   },
   input: {
     borderColor: '#ccc',
@@ -88,6 +101,8 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
     borderRadius: 8,
+    color: '#fff', // ⚪ input text color
+    backgroundColor: '#222' // 🔳 input background for contrast
   },
 });
 
