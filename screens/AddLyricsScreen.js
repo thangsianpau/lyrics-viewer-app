@@ -19,6 +19,8 @@ const AddLyricsScreen = () => {
   const [loading, setLoading] = useState(false);
 
   const saveLyrics = async () => {
+    console.log('✅ Save button pressed');
+
     if (!artist || !title || !lyrics) {
       Alert.alert('Missing Info', 'Please fill in artist, title, and lyrics.');
       return;
@@ -87,7 +89,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     justifyContent: 'center',
-    backgroundColor: '#000',
+    backgroundColor: '#000', // black background for dark mode
   },
   heading: {
     fontSize: 22,
@@ -107,7 +109,7 @@ const styles = StyleSheet.create({
   },
   lyricsInput: {
     minHeight: 160,
-    textAlignVertical: 'top', // for Android multiline
+    textAlignVertical: 'top',
   },
 });
 
