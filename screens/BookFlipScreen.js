@@ -56,10 +56,10 @@ export default function BookFlipScreen() {
     <PagerView style={styles.pager} initialPage={0}>
       {lyrics.map((item, index) => (
         <View key={index} style={styles.page}>
-          <Text style={styles.title}>{item.Title || '(Untitled)'}</Text>
-          <Text style={styles.artist}>by {item.Artist || 'Unknown Artist'}</Text>
+          <Text style={styles.title}>{item.title || item.Title || '(Untitled)'}</Text>
+          <Text style={styles.artist}>by {item.artist || item.Artist || 'Unknown Artist'}</Text>
           <Text style={styles.lyrics}>
-            {(item.Lyrics || '(No lyrics)').split('\n').map((line, i) => (
+            {(item.lyrics || item.Lyrics || '(No lyrics)').split('\n').map((line, i) => (
               <Text key={i}>{line}{'\n'}</Text>
             ))}
           </Text>
@@ -71,42 +71,42 @@ export default function BookFlipScreen() {
 
 const styles = StyleSheet.create({
   pager: {
-    flex: 1
+    flex: 1,
   },
   page: {
     flex: 1,
     padding: 24,
     justifyContent: 'center',
-    backgroundColor: '#f5f2e7'
+    backgroundColor: '#f5f2e7',
   },
   title: {
     fontSize: 26,
     fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
-    fontFamily: 'serif'
+    fontFamily: 'serif',
   },
   artist: {
     fontSize: 18,
     marginBottom: 20,
     textAlign: 'center',
-    fontStyle: 'italic'
+    fontStyle: 'italic',
   },
   lyrics: {
     fontSize: 16,
     lineHeight: 26,
-    textAlign: 'left'
+    textAlign: 'left',
   },
   emptyText: {
     fontSize: 18,
     fontStyle: 'italic',
     color: '#555',
-    textAlign: 'center'
+    textAlign: 'center',
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f2e7'
-  }
+    backgroundColor: '#f5f2e7',
+  },
 });
