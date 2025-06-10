@@ -1,63 +1,54 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  ScrollView
+} from 'react-native';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 const AddLyricsScreen = () => {
   const [artist, setArtist] = useState('');
   const [title, setTitle] = useState('');
+  const [lyrics, setLyrics] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const getLyrics = async (artist, title) => {
-    try {
-      const res = await fetch(`https://api.lyrics.ovh/v1/${artist}/${title}`);
-      const data = await res.json();
-      if (!data.lyrics) {
-        throw new Error('Lyrics not found.');
-      }
-      return data.lyrics;
-    } catch (err) {
-      console.error('Fetch Error:', err);
-      Alert.alert('Error', 'Lyrics not found. Check artist or title.');
-      return null;
-    }
-  };
-
   const saveLyrics = async () => {
-    if (!artist || !title) {
-      Alert.alert('Missing Info', 'Please enter both artist and title.');
+    if (!artist || !title || !lyrics) {
+      Alert.alert('Missing Info', 'Please fill in artist, title, and lyrics.');
       return;
     }
 
     setLoading(true);
-    const lyrics = await getLyrics(artist, title);
-
-    if (!lyrics) {
-      setLoading(false);
-      return;
-    }
 
     try {
       await addDoc(collection(db, 'lyrics'), {
-        title,
         artist,
+        title,
         lyrics,
-        createdAt: new Date()
+        createdAt: new Date(),
       });
       Alert.alert('Success', 'Lyrics saved!');
       setArtist('');
       setTitle('');
+      setLyrics('');
     } catch (error) {
+      console.error('Firebase Error:', error);
       Alert.alert('Error', 'Failed to save lyrics.');
-      console.error('Firebase error:', error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>Add New Lyrics</Text>
+
       <TextInput
         placeholder="Artist"
         placeholderTextColor="#888"
@@ -72,28 +63,38 @@ const AddLyricsScreen = () => {
         onChangeText={setTitle}
         style={styles.input}
       />
+      <TextInput
+        placeholder="Lyrics"
+        placeholderTextColor="#888"
+        value={lyrics}
+        onChangeText={setLyrics}
+        multiline
+        numberOfLines={8}
+        style={[styles.input, styles.lyricsInput]}
+      />
+
       {loading ? (
         <ActivityIndicator size="large" color="#007AFF" />
       ) : (
-        <Button title="Fetch & Save Lyrics" onPress={saveLyrics} />
+        <Button title="Save Lyrics" onPress={saveLyrics} />
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 20,
     justifyContent: 'center',
-    backgroundColor: '#000' // 🖤 background for dark mode
+    backgroundColor: '#000',
   },
   heading: {
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#fff' // 🟡 visible in dark mode
+    color: '#fff',
   },
   input: {
     borderColor: '#ccc',
@@ -101,8 +102,12 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
     borderRadius: 8,
-    color: '#fff', // ⚪ input text color
-    backgroundColor: '#222' // 🔳 input background for contrast
+    color: '#fff',
+    backgroundColor: '#222',
+  },
+  lyricsInput: {
+    minHeight: 160,
+    textAlignVertical: 'top', // for Android multiline
   },
 });
 
