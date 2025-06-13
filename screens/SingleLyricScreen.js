@@ -1,46 +1,92 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 
-export default function SingleLyricScreen({ route }) {
-  const { lyric } = route.params;
+export default function ViewLyricsScreen({ navigation }) {
+  const [lyricsList, setLyricsList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'lyrics'), (snapshot) => {
+      let data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      // Sort alphabetically by title (case insensitive)
+      data.sort((a, b) =>
+        (a.title || '').toLowerCase().localeCompare((b.title || '').toLowerCase())
+      );
+      setLyricsList(data);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+        <Text style={styles.itemText}>Loading lyrics...</Text>
+      </View>
+    );
+  }
+
+  if (lyricsList.length === 0) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.itemText}>No lyrics found. Try adding some!</Text>
+      </View>
+    );
+  }
+
+  // Main: scrollable, tap-to-detail list
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>{lyric.title || '(Untitled)'}</Text>
-      <Text style={styles.artist}>by {lyric.artist || 'Unknown Artist'}</Text>
-      <Text style={styles.lyrics}>
-        {(lyric.lyrics || '(No lyrics)').split('\n').map((line, i) => (
-          <Text key={i}>{line}{'\n'}</Text>
-        ))}
-      </Text>
-    </ScrollView>
+    <FlatList
+      data={lyricsList}
+      keyExtractor={(item) => item.id}
+      contentContainerStyle={styles.container}
+      renderItem={({ item, index }) => (
+        <TouchableOpacity
+          style={styles.item}
+          onPress={() => navigation.navigate('SingleLyricScreen', { lyric: item })}
+        >
+          <Text style={styles.itemText}>
+            {index + 1}. {item.title || '(Untitled)'}
+          </Text>
+        </TouchableOpacity>
+      )}
+    />
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 30,
-    backgroundColor: '#f5f2e7',
-    flexGrow: 1,
-    minHeight: '100%',
+    paddingVertical: 20,
+    backgroundColor: '#000',
   },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-    fontFamily: 'serif',
+  item: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomColor: '#444',
+    borderBottomWidth: 1,
   },
-  artist: {
+  itemText: {
     fontSize: 18,
-    fontStyle: 'italic',
-    textAlign: 'center',
-    marginBottom: 20,
+    color: '#fff',
   },
-  lyrics: {
-    fontSize: 16,
-    lineHeight: 26,
-    color: '#222',
-    marginTop: 10,
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
   },
 });
