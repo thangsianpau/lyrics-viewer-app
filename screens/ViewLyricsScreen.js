@@ -9,10 +9,12 @@ import {
 } from 'react-native';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
+import { useNavigation } from '@react-navigation/native';
 
-export default function ViewLyricsScreen({ navigation }) {
+export default function ViewLyricsScreen() {
   const [lyricsList, setLyricsList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'lyrics'), (snapshot) => {
@@ -20,7 +22,7 @@ export default function ViewLyricsScreen({ navigation }) {
         id: doc.id,
         ...doc.data(),
       }));
-      // Sort alphabetically by title (case insensitive)
+      // Sort by title alphabetically (case-insensitive)
       data.sort((a, b) =>
         (a.title || '').toLowerCase().localeCompare((b.title || '').toLowerCase())
       );
@@ -35,7 +37,7 @@ export default function ViewLyricsScreen({ navigation }) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" />
-        <Text>Loading lyrics...</Text>
+        <Text style={styles.itemText}>Loading lyrics...</Text>
       </View>
     );
   }
@@ -43,12 +45,11 @@ export default function ViewLyricsScreen({ navigation }) {
   if (lyricsList.length === 0) {
     return (
       <View style={styles.centered}>
-        <Text>No lyrics found. Try adding some!</Text>
+        <Text style={styles.itemText}>No lyrics found. Try adding some!</Text>
       </View>
     );
   }
 
-  // SHOW LIST OF TITLES. When pressed, show details in alert or navigate if you have a detail screen.
   return (
     <FlatList
       data={lyricsList}
@@ -57,14 +58,9 @@ export default function ViewLyricsScreen({ navigation }) {
       renderItem={({ item, index }) => (
         <TouchableOpacity
           style={styles.item}
-          onPress={() => {
-            // If you have a dedicated detail screen, use navigation.navigate.
-            // For now, just show alert.
-            Alert.alert(
-              item.title,
-              `by ${item.artist}\n\n${item.lyrics}`
-            );
-          }}
+          onPress={() =>
+            navigation.navigate('SingleLyricScreen', { lyric: item })
+          }
         >
           <Text style={styles.itemText}>
             {index + 1}. {item.title || '(Untitled)'}
