@@ -1,47 +1,34 @@
-import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { lyricsList } from '../data/lyrics';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { Button, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import { ThemedText, ThemedView } from '@/components';
+import ParallaxScrollView from '@/components/ParallaxScrollView';
 
-useEffect(() => {
-  const unsubscribe = onSnapshot(collection(db, 'lyrics'), (snapshot) => {
-    const data = snapshot.docs.map(doc => doc.data());
-    setLyrics(data);
-  });
+export default function HomeScreen() {
+  const router = useRouter();
 
-  return unsubscribe; // stop listening when screen unmounts
-}, []);
-
-
-export default function HomeScreen({ navigation }) {
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={lyricsList}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => navigation.navigate('ViewLyrics', { lyric: item })}>
-            <Text style={styles.item}>{item.title} - {item.artist}</Text>
-          </TouchableOpacity>
-        )}
-      />
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AddLyrics')}>
-        <Text style={styles.buttonText}>+ Add New Lyrics</Text>
-      </TouchableOpacity>
-    </View>
+    <ParallaxScrollView
+      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}>
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="title">Welcome!</ThemedText>
+      </ThemedView>
+
+      <ThemedView style={styles.buttonContainer}>
+        <Button title="📖 View Lyrics Book" onPress={() => router.push('/book')} />
+        <Button title="➕ Add New Lyric" onPress={() => router.push('/add')} />
+      </ThemedView>
+    </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20 },
-  item: { fontSize: 18, marginVertical: 10 },
-  button: {
-    marginTop: 20,
-    backgroundColor: '#4CAF50',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center'
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: 16,
   },
-  buttonText: { color: 'white', fontWeight: 'bold' }
+  buttonContainer: {
+    margin: 24,
+    gap: 16,
+  },
 });
