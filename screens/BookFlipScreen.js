@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ActivityIndicator, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  ActivityIndicator,
+  Platform,
+} from 'react-native';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
@@ -12,15 +19,22 @@ export default function BookFlipScreen() {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'lyrics'), (snapshot) => {
-      const data = snapshot.docs.map(doc => doc.data());
-      const sorted = data.sort((a, b) => a.title.localeCompare(b.title));
-      console.log('🎵 Sorted lyrics:', sorted);
+      const rawData = snapshot.docs.map((doc) => doc.data());
+
+      // ✅ Safe sort with fallback to empty string if title is missing
+      const sorted = rawData.sort((a, b) => {
+        const titleA = (a.title || a.Title || '').toLowerCase();
+        const titleB = (b.title || b.Title || '').toLowerCase();
+        return titleA.localeCompare(titleB);
+      });
+
+      console.log('✅ Sorted lyrics:', sorted);
       setLyrics(sorted);
       setLoading(false);
     });
 
     if (Platform.OS !== 'web') {
-      import('react-native-pager-view').then(module => {
+      import('react-native-pager-view').then((module) => {
         setPagerView(() => module.default);
       });
     }
@@ -28,14 +42,18 @@ export default function BookFlipScreen() {
     return () => unsubscribe();
   }, []);
 
+  // ⛔ Web fallback
   if (Platform.OS === 'web') {
     return (
       <View style={styles.centered}>
-        <Text style={styles.emptyText}>Flip view not supported on web.</Text>
+        <Text style={styles.emptyText}>
+          Flip view is not supported on web. Please use a mobile device.
+        </Text>
       </View>
     );
   }
 
+  // ⏳ Loading spinner
   if (loading || !PagerView) {
     return (
       <View style={styles.centered}>
@@ -45,6 +63,7 @@ export default function BookFlipScreen() {
     );
   }
 
+  // ❌ No lyrics
   if (lyrics.length === 0) {
     return (
       <View style={styles.centered}>
@@ -53,14 +72,15 @@ export default function BookFlipScreen() {
     );
   }
 
+  // ✅ Show lyrics with flip pages
   return (
     <PagerView style={styles.pager} initialPage={0}>
       {lyrics.map((item, index) => (
         <View key={index} style={styles.page}>
-          <Text style={styles.title}>{item.title || '(Untitled)'}</Text>
-          <Text style={styles.artist}>by {item.artist || 'Unknown Artist'}</Text>
+          <Text style={styles.title}>{item.title || item.Title || '(Untitled)'}</Text>
+          <Text style={styles.artist}>by {item.artist || item.Artist || 'Unknown Artist'}</Text>
           <Text style={styles.lyrics}>
-            {(item.lyrics || '(No lyrics)').split('\n').map((line, i) => (
+            {(item.lyrics || item.Lyrics || '(No lyrics)').split('\n').map((line, i) => (
               <Text key={i}>{line}{'\n'}</Text>
             ))}
           </Text>
@@ -71,7 +91,9 @@ export default function BookFlipScreen() {
 }
 
 const styles = StyleSheet.create({
-  pager: { flex: 1 },
+  pager: {
+    flex: 1,
+  },
   page: {
     flex: 1,
     padding: 24,
