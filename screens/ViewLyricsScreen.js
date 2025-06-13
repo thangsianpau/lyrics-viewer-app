@@ -9,19 +9,21 @@ import {
 } from 'react-native';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import { useNavigation } from '@react-navigation/native';
 
-export default function ViewLyricsScreen() {
+export default function ViewLyricsScreen({ navigation }) {
   const [lyricsList, setLyricsList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'lyrics'), (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
+      let data = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+      // Sort alphabetically by title (case insensitive)
+      data.sort((a, b) =>
+        (a.title || '').toLowerCase().localeCompare((b.title || '').toLowerCase())
+      );
       setLyricsList(data);
       setLoading(false);
     });
@@ -46,6 +48,7 @@ export default function ViewLyricsScreen() {
     );
   }
 
+  // SHOW LIST OF TITLES. When pressed, show details in alert or navigate if you have a detail screen.
   return (
     <FlatList
       data={lyricsList}
@@ -54,13 +57,18 @@ export default function ViewLyricsScreen() {
       renderItem={({ item, index }) => (
         <TouchableOpacity
           style={styles.item}
-          onPress={() =>
-            navigation.navigate('SingleLyricScreen', {
-              lyric: item,
-            })
-          }
+          onPress={() => {
+            // If you have a dedicated detail screen, use navigation.navigate.
+            // For now, just show alert.
+            Alert.alert(
+              item.title,
+              `by ${item.artist}\n\n${item.lyrics}`
+            );
+          }}
         >
-          <Text style={styles.itemText}>{index + 1}. {item.title}</Text>
+          <Text style={styles.itemText}>
+            {index + 1}. {item.title || '(Untitled)'}
+          </Text>
         </TouchableOpacity>
       )}
     />
