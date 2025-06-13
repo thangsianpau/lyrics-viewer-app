@@ -16,7 +16,6 @@ const AddLyricsScreen = () => {
       Alert.alert('Missing Info', 'Please fill in artist, title, and lyrics.');
       return;
     }
-
     setLoading(true);
 
     try {
@@ -42,13 +41,27 @@ const AddLyricsScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>Add New Lyrics</Text>
-      <TextInput placeholder="Artist" value={artist} onChangeText={setArtist} style={styles.input} />
-      <TextInput placeholder="Song Title" value={title} onChangeText={setTitle} style={styles.input} />
+      <TextInput
+        placeholder="Artist"
+        placeholderTextColor="#888"
+        value={artist}
+        onChangeText={setArtist}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Song Title"
+        placeholderTextColor="#888"
+        value={title}
+        onChangeText={setTitle}
+        style={styles.input}
+      />
       <TextInput
         placeholder="Lyrics"
+        placeholderTextColor="#888"
         value={lyrics}
         onChangeText={setLyrics}
-        multiline numberOfLines={8}
+        multiline
+        numberOfLines={8}
         style={[styles.input, styles.lyricsInput]}
       />
       {loading ? (
